@@ -98,7 +98,7 @@
 
 以FNO2d模型的前向对齐验证为例，主要分为以下4步：
 
-&nbsp;&nbsp;（1）首先将arcy_train_16.pt、darcy_test_16.pt、darcy_test_32.pt等数据集[https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/datad](https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/data)转化为ndarray格式；
+&nbsp;&nbsp;（1）首先将arcy_train_16.pt、darcy_test_16.pt、darcy_test_32.pt等数据集[https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/data](https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/datad)转化为ndarray格式；
 
 &nbsp;&nbsp;（2）然后分别在paddle和torch下对模型的dataloder，datasets进行了对齐，保证两者相同；
 
@@ -209,6 +209,12 @@ FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
 
 > 可以以里程碑列表的方式，细化开发过程，并给出排期规划。
 
+| 里程碑        |  时间点     |
+| -------------| ------------ | 
+| 提交RFC      |     2024.10.25        |    
+| 提交PR，修改代码完成合入          |    2024.11.25       | 
 ## 7. 影响面
 
 > 描述本方案对 PaddleScience 可能产生的影响。
+
+为 PaddleScience 添加`neuraloperator`库。
