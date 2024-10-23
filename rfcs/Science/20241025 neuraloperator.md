@@ -98,7 +98,7 @@
 
 以FNO2d模型的前向对齐验证为例，主要分为以下4步：
 
-&nbsp;&nbsp;（1）首先将arcy_train_16.pt、darcy_test_16.pt、darcy_test_32.pt等数据集[https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/data](https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/datad)转化为ndarray格式；
+&nbsp;&nbsp;（1）首先将arcy_train_16.pt、darcy_test_16.pt、darcy_test_32.pt等数据集（[https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/data](https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/datad)）转化为ndarray格式；
 
 &nbsp;&nbsp;（2）然后分别在paddle和torch下对模型的dataloder，datasets进行了对齐，保证两者相同；
 
