@@ -77,30 +77,33 @@
 
 > 说明如何对复现代码/开发API进行测试，以及验收标准，保障任务完成质量。
 
+以下所有结果均在 NVIDIA RTX 4090 GPU 上测试，操作系统为 Ubuntu 20.04，Python 3.8。并且在两个独立的环境进行测试，环境1：PyTorch  1.10（CUDA 12.3）
+环境2：Paddle 3.0（CUDA 12.3）。
+
 1.模型前向对齐
 
 1.1权重转化
 
-为了保证模型前向对齐不受到模型参数不一致的影响，我们使用相同的权重参数对模型进行初始化。
+为了保证模型前向对齐不受到模型参数不一致的影响，本项目使用相同的权重参数对模型进行初始化。
 
 生成相同权重参数主要分为以下 3 步：
 
-&nbsp;&nbsp;（1）随机neuraloperator-pytorch的官方模型参数并保存成 pytorch_model.pth；
+&nbsp;&nbsp;（1）随机初始化neuraloperator-pytorch的官方模型参数并保存成 pytorch_model.pth；
 
-&nbsp;&nbsp;（2）将 pytorch_model.pth通过paddle官方文档中的torch2paddle.py 生成paddle_model.pdparams；
+&nbsp;&nbsp;（2）将 pytorch_model.pth通过paddle官方文档中的torch2paddle.py 生成 paddle_model.pdparams；
 
-&nbsp;&nbsp;（3）将paddle_model.pdparams载入neuraloperator-paddle模型。
+&nbsp;&nbsp;（3）将 paddle_model.pdparams载入  neuraloperator-paddle模型。
 
 
-转换模型时，torch 和 paddle 存在参数需要转换的部分，主要是傅里叶卷积层中复数的权重的转换过程是将实部和虚部分开保存和加载。
+在转换模型时，PyTorch 和 paddle 之间存在需要转换的参数，主要体现在傅里叶卷积层的复数权重。转换过程中，需要将复数权重的实部和虚部分别分开进行保存和加载。
 
 1.2模型前向对齐验证
 
 以FNO2d模型的前向对齐验证为例，主要分为以下4步：
 
-&nbsp;&nbsp;（1）首先将arcy_train_16.pt、darcy_test_16.pt、darcy_test_32.pt等数据集（[https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/data](https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/datad)）转化为ndarray格式；
+&nbsp;&nbsp;（1）将arcy_train_16.pt、darcy_test_16.pt、darcy_test_32.pt等数据集（[https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/data](https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/datad)）转化为ndarray格式；
 
-&nbsp;&nbsp;（2）然后分别在paddle和torch下对模型的dataloder，datasets进行了对齐，保证两者相同；
+&nbsp;&nbsp;（2）分别在 Paddle 和 PyTorch 下对模型的 DataLoader 和 Datasets 进行了对齐，确保两者一致；
 
 &nbsp;&nbsp;（3）PyTorch 前向传播：定义 PyTorch 模型，加载权重，固定 seed，基于 numpy 生成`channel=3`的随机数，转换为 `torch.Tensor`，送入网络，获取输出`y_pytorch`；
 
@@ -110,9 +113,9 @@
 
 | 模型   | Max(y_diff)  | Min(y_diff)   | MSE(y_pytorch, y_paddle)   |
 |:-----:|:-----:|:-----:|:-----:|
+| FNO1d | 2.78e-05 | 1.11e-08  | 9.45e-11 |
 | FNO2d | 2.69e-05 | 0.00 | 3.44e-11 |
-| &nbsp; | &nbsp; | &nbsp;  | &nbsp; |
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |
+| FNO3d | 4.75e-05 |0.00   | 5.66e-11  |
 | &nbsp; | &nbsp; | &nbsp;  | &nbsp; |
 | &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |
 | &nbsp; | &nbsp; | &nbsp;  | &nbsp; |
@@ -139,8 +142,8 @@ FNO2d-torch与FNO2d-paddle使用数据集 darcy_train_16.npy并且设置`ntrains
 FNO2d-torch的优化器参数为：
 ```python
 optimizer = torch.optim.Adam(model.parameters(), 
-                                lr=8e-3, 
-                                weight_decay=1e-4)
+                             lr=8e-3, 
+                             weight_decay=1e-4)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30)
 
 ```
@@ -148,8 +151,6 @@ scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30)
 FNO2d-paddle的优化器参数为：
 ```python
 scheduler = paddle.optimizer.lr.CosineAnnealingDecay(learning_rate=0.008, T_max=30)
-
-# 创建 Adam 优化器，并将调度器作为学习率传递给优化器
 optimizer = paddle.optimizer.Adam(parameters=model.parameters(), 
                                   learning_rate=scheduler, 
                                   weight_decay=0.0001)
@@ -172,14 +173,20 @@ FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
 | 8| 15.51529121 | 15.51611137 |8.20e-04|0.00635114|0.00635114|0.00|
 | 9| 14.76096916 | 14.75966835 |1.30e-03|0.00600000|0.00600000|0.00|
 
+各个模型在模型训练对齐时使用的数据维度：
+| 模型   | 数据集名称 |方程类型 |数据维度 |
+|:-----:|:-----:|:-----:|:-----:|
+| FNO1d |  | |[32,3,16]|
+| FNO2d | darcy_train_16.npy |Darcy Flow| [32,3,16,16]|
+| FNO3d |  | |[32,1,64,64,10]|
 
 
 各个模型最终训练loss的差异为：
 | 模型   | Max(loss_diff)  | Min(loss_diff)   | MSE(loss_pytorch, loss_paddle)   | lr_diff   |
 |:-----:|:-----:|:-----:|:-----:|-----:|
-| FNO2d | 7.20e-03 | 0.00 | 9.18e-06 |&nbsp; |
-| &nbsp; | &nbsp; | &nbsp;  | &nbsp; |&nbsp; |
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |&nbsp; |
+| FNO1d | 1.72e-02 | 3.05e-05  | 6.12e-05 |0.00 |
+| FNO2d | 7.20e-03 | 0.00 | 9.18e-06 |0.00 |
+| FNO3d | 7.50e-03 |1.14e-05   | 6.96e-06  |0.00 |
 | &nbsp; | &nbsp; | &nbsp;  | &nbsp; |&nbsp; |
 | &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |&nbsp; |
 | &nbsp; | &nbsp; | &nbsp;  | &nbsp; |&nbsp; |
@@ -189,13 +196,14 @@ FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
 | &nbsp; | &nbsp; | &nbsp;  | &nbsp; |&nbsp; |
 | &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |&nbsp; |
 
-使用`timeit`中的`default_timer`进行进行计时，各个模型10个epochs训练耗时`10_epochs_time`, 数据读取耗时`data_reader_time`对比结果如下：
+
+使用 `timeit` 模块中的 `default_timer` 进行计时，各个模型在训练 10个epochs 时的耗时为 `10_epochs_time`，数据读取耗时为 `data_reader_time`，其中包括所有的数据预处理步骤（例如对 y 进行UnitGaussianNormalizer）
 
 | 模型   | 10_epochs_time_torch | data_reader_time_torch|10_epochs_time_paddle|data_reader_time_paddle| 
 |:-----:|:-----:|:-----:|:-----:|:-----:|
+| FNO1d | 1.47e-01 | 4.81e-03 |4.19e-01|1.77e-01|
 | FNO2d | 1.74e-01 | 7.17e-03 |4.56e-01|1.84e-01| 
-| &nbsp; | &nbsp; | &nbsp;  |||
-| &nbsp; | &nbsp; |&nbsp;   ||| 
+| FNO3d | 1.44 |1.57e-02   |1.42|2.54e-01| 
 | &nbsp; | &nbsp; | &nbsp;  ||| 
 | &nbsp; | &nbsp; |&nbsp;   ||| 
 | &nbsp; | &nbsp; | &nbsp;  ||| 
