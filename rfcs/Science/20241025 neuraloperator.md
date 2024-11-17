@@ -6,11 +6,12 @@
 
 |              |                    |
 | ------------ | -----------------  |
-| 提交作者      |         Kai Qi     |
+| 提交作者      |         Kai-Qi     |
+| 队伍名称      |         qikai123     |
 | 提交时间      |       2024-10-25   |
 | RFC 版本号    | v1.0               |
-| 依赖飞桨版本   | 3.0                |
-| 文件名        | 20241025_neuraloperator.md |
+| 依赖飞桨版本   | 3.0-beta                |
+| 文件名        | 20241025_paddle_for_neuraloperator_qikai123.md |
 
 ## 1. 概述
 
@@ -28,7 +29,7 @@
 
 1. 整理 `neuraloperator` 的所有公开 API；
 2. 使用 paddle 的 python API 等价组合实现上述公开 API 的功能；
-3. 参考 pytorch 后端已有代码，撰写飞桨后端的单测文件，并自测通过。
+3. 参考 PyTorch 后端已有代码，撰写飞桨后端的单测文件，并自测通过。
 
 ### 1.3 意义
 
@@ -40,15 +41,14 @@
 
 当前的PaddleScience有`neuraloperator`相关的[神经算子](https://github.com/PaddlePaddle/PaddleScience/tree/develop/examples/neuraloperator)实现。
 
-本方案不考虑原有PaddleScience有`neuraloperator`的实现，而是单独按照
-`neuraloperator`的源码来撰写支持飞桨后端的文件。
+但是为了确保代码的合入和比赛结束后成果的可维护性，本方案将不采用 PaddleScience 中现有的 `neuraloperator` 实现，而是基于 `neuraloperator` 的源码，独立编写支持飞桨后端的文件。
 
 ## 3. 目标调研
 
 
 参考的源代码为：[https://github.com/neuraloperator/neuraloperator/tree/0.3.0](https://github.com/neuraloperator/neuraloperator/tree/0.3.0)
 
-`neuraloperator`源代码实现的10个模型分别为`TFNO`, `TFNO1d`, `TFNO2d`, `TFNO3d`,`FNO`, `FNO1d`, `FNO2d`, `FNO3d`, `SFNO`, `UNO`。
+`neuraloperator`源代码实现的8个模型分别为, `FNO1d`, `FNO2d`, `FNO3d`, `SFNO`, `UNO`, `TFNO1d`, `TFNO2d`, `TFNO3d`。
 
 为`neuraloperator`支持飞桨后端，主要的难点在于：
 
@@ -61,14 +61,102 @@
 比赛要求：所有文件组织结构必须与原有代码保持一致（新增文件除外），原有的注释、换行、空格、开源协议等内容不能随意变动（新增内容除外），否则会严重影响代码合入和比赛结束后成果代码的维护。
 
 
-所以本项目按照[`neuraloperator`](https://github.com/neuraloperator/neuraloperator/tree/0.3.0)的源码来撰写支持飞桨后端的文件，并且保持文件结构、名称、注释、空格等都相同。
+所以本项目按照[`neuraloperator`](https://github.com/neuraloperator/neuraloperator/tree/0.3.0)的源码来撰写支持飞桨后端的文件，并且严格保持文件结构、名称、注释、空格等都相同。
+
+### 4.1[`neuraloperator`](https://github.com/neuraloperator/neuraloperator/tree/0.3.0)核心API和对应单测文件列表
+
+| API列表                       | 对应单测  | 
+| ----------------------------- | -------- | 
+| BaseSpectralConv              | 无 | 
+| einsum_complexhalf_two_input  | 无 |
+|  einsum_complexhalf           |  无|
+|  PositionalEmbedding          | 无 |
+|   FNOBlocks       | test_fno_block.py |
+|   SubModule         | 无 |
+|     FCLegendre          | 无 |
+|     IntegralTransform          | 无 |
+|      _contract_dense         | 无 |
+|       _contract_dense_separable        |无  |
+|      _contract_cp         | 无 |
+|        _contract_tucker       | 无 |
+|       _contract_tt        |  无|
+|       get_contract_fun        |无  |
+|      legacy_spectral_convolution_SpectralConv         | test_legacy_spectral_convolution.py |
+|     SubConv          | 无 |
+|       legacy_spectral_convolution_SpectralConv1d        | test_legacy_spectral_convolution.py |
+|        legacy_spectral_convolution_SpectralConv2d       | test_legacy_spectral_convolution.py |
+|       legacy_spectral_convolution_SpectralConv3d        | test_legacy_spectral_convolution.py |
+|       MLP        |无  |
+|         MLPLinear      |无  |
+|        AdaIN       |无  |
+|     DomainPadding          | test_padding.py |
+|      resample         | test_resample.py |
+|      iterative_resample         | 无 |
+|    segment_csr           | 无 |
+|      simple_neighbor_search       | 无 |
+|         skip_connection      | 无 |
+|      SoftGating         | 无 |
+|         spectral_convolution_SpectralConv      | test_spectral_convolution.py  |
+|        spectral_convolution_SpectralConv1d        | test_spectral_convolution.py |
+|          spectral_convolution_SpectralConv2d      |  test_spectral_convolution.py|
+|           spectral_convolution_SpectralConv3d     | test_spectral_convolution.py |
+|        SHT       | test_spherical_convolution.py |
+|       SphericalConv        | test_spherical_convolution.py |
+|        FNO       | test_fno.py |
+|         FNO1d      | test_fno.py |
+|          FNO2d     | test_fno.py |
+|          FNO3d     | test_fno.py |
+|        TFNO       |  test_fno.py|
+|       TFNO1d        | test_fno.py |
+|        TFNO2d       | test_fno.py |
+|           TFNO3d    | test_fno.py |
+|         UNO      | test_uno.py |
+|      central_diff_1d       | 无|
+|    central_diff_2d        | 无|
+|      central_diff_3d       | 无|
+|     LpLoss        |无 |
+|     H1Loss        |无 |
+|     IregularLpqLoss        | 无|
+|     WeightedL2DragLoss        |无 |
+|      BurgersEqnLoss       | 无|
+|      ICLoss       | 无|
+|    FieldwiseAggregatorLoss         | 无|
+|     WeightedSumLoss        |无 |
+|      load_burgers_1d       |无 |
+|      load_burgers_1dtime       |无 |
+|       load_darcy_flow_small      |无 |
+|       load_darcy_pt      |无 |
+|         DefaultDataProcessor     | test_data_processor.py|
+|    MGPatchingDataProcessor        | 无|
+|       H5pyDataset      |无 |
+|     load_navier_stokes_pt        | 无|
+|       _load_navier_stokes_test_HR      | 无|
+|      OutputEncoder       | 无|
+|    MultipleFieldOutputEncoder         |无 |
+|    DictTransform         |无 |
+|    UnitGaussianNormalizer         | test_output_encoder.py|
+|         load_pt_traintestsplit    | 无|
+|     load_spherical_swe        |无 |
+|      SphericalSWEDataset       |无 |
+|     TensorDataset        |无 |
+|      GeneralTensorDataset       |无 |
+|      Transform       | 无|
+|        Normalizer      |无 |
+|     Composite       | 无|
+|   MGPatchingTransform          |无 |
+|     RandomMGPatch        |无 |
+|     MGPTensorDataset        |无 |
+|    regular_grid         | 无|
+|     PositionalEmbedding2D        |无 |
+|      ZarrDataset       |无 |
+
 
 
 
 ## 5. 测试和验收的考量
 
 
-所有测试结果均在 NVIDIA RTX 4090 GPU 上进行，操作系统为 Ubuntu 20.04，。测试分为三个独立的环境：环境1 使用 PyTorch 1.10（CUDA 12.3），环境2 使用 Paddle 3.0（CUDA 12.3），主要用于代码测试；环境3 结合 PyTorch 2.5.0（CUDA 11.8） 和 Paddle 3.0（CUDA 11.8），用于权重转换。
+所有测试结果均在 NVIDIA RTX 4090 GPU 上进行，操作系统为 Ubuntu 20.04，。测试分为三个独立的环境：环境1 使用 PyTorch 1.10（CUDA 12.3），环境2 使用 Paddle 3.0-beta（CUDA 12.3），环境1和环境2主要用于代码测试；环境3 包括 PyTorch 2.5.0（CUDA 11.8） 和 Paddle 3.0-beta（CUDA 11.8），用于模型初始化权重参数的转换。
 
 ### 5.1 模型前向对齐
 
@@ -78,7 +166,7 @@
 
 &nbsp;&nbsp;（1）随机初始化neuraloperator-pytorch的官方模型参数并保存成 pytorch_model.pth；
 
-&nbsp;&nbsp;（2）使用paddle官方文档中的 torch2paddle.py 将 pytorch_model.pth 转化为 paddle_model.pdparams；
+&nbsp;&nbsp;（2）使用Paddle/models/tutorials/mobilenetv3_prod/Step1-5中的 torch2paddle.py 将 pytorch_model.pth 转化为 paddle_model.pdparams；
 
 &nbsp;&nbsp;（3）将生成的 paddle_model.pdparams 加载到 neuraloperator-paddle模型中。
 
@@ -91,7 +179,7 @@
 
 模型前向对齐验证主要分为以下四个步骤：
 
-&nbsp;&nbsp;（1）将数据集如arcy_train_16.pt、darcy_test_16.pt、darcy_test_32.pt等转化为ndarray格式；（[https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/data](https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/datad)）
+&nbsp;&nbsp;（1）将数据集如darcy_train_16.pt、darcy_test_16.pt、darcy_test_32.pt等转化为ndarray格式；（[https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/data](https://github.com/neuraloperator/neuraloperator/tree/0.3.0/neuralop/datasets/datad)）
 
 &nbsp;&nbsp;（2）在 Paddle 和 PyTorch 中分别对模型的 DataLoader 和 Datasets 进行对齐处理，确保两者一致；
 
@@ -99,23 +187,20 @@
 
 &nbsp;&nbsp;（4）飞桨前向传播：定义飞桨模型，加载步骤 5.1.1 中转换后的权重，将步骤（3）中的生成的随机数，转换为 `paddle.Tensor`，送入网络，获取输出`y_paddle`。
 
-最终定义`y_diff=|y_pytorch-y_paddle|`。最终差异结果如下：
+最终定义`y_diff=|y_pytorch-y_paddle|`。最终不同模型的结果如下，其中参数`layers`表示Fourier Layers的数目。
 
 | 模型   | Max(y_diff)  | Min(y_diff)   | MSE(y_pytorch, y_paddle)   |备注|
 |:-----:|:-----:|:-----:|:-----:|:-----:|
 | FNO1d | 2.78e-05 | 1.11e-08  | 9.45e-11 |单精度训练|
 | FNO2d | 2.69e-05 | 0.00 | 3.44e-11 |单精度训练|
 | FNO3d | 4.75e-05 |0.00   | 5.66e-11  |单精度训练|
-| UFNO, layers=1 | 1.03e-09 | 0.00 | 6.91e-21 |双精度训练|
-| UFNO，layers=5 | 4.02e-02 |2.24e-05  | 2.99e-04  |双精度训练，具体见6.1|
-| SFNO | 5.60e-02 | 7.88e-07  | 1.92e-04 |双精度训练|
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  ||
-| &nbsp; | &nbsp; | &nbsp;  | &nbsp; ||
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  ||
-| &nbsp; | &nbsp; | &nbsp;  | &nbsp; ||
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  ||
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  ||
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  ||
+| UFNO(layers=1) | 1.03e-09 | 0.00 | 6.91e-21 |双精度训练|
+| UFNO(layers=5) | 1.33e-08 |8.05e-13  | 1.05e-17  |双精度训练|
+| SFNO | 3.068e-09 | 1.81e-13  | 4.36e-19 |双精度训练|
+| TFNO1d | &nbsp; |&nbsp;   | &nbsp;  |撰写中，具体难点见6.3节|
+| TFNO2d | &nbsp; | &nbsp;  | &nbsp; |撰写中，具体难点见6.3节|
+|TFNO3d | &nbsp; |&nbsp;   | &nbsp;  |撰写中，具体难点见6.3节|
+
 
 
 
@@ -124,7 +209,7 @@
 
 FNO2d-torch的每个epoch训练loss（L2 norm）为`loss_pytorch`，学习率为`lr_pytorch`。FNO2d-paddle的训练loss（L2 norm）为`loss_paddle`. 学习率为`lr_paddle`。定义指标`loss_diff=|loss_pytorch-loss_paddle|`，`lr_diff=|lr_pytorch-lr_paddle|`。
 
-FNO2d-torch与FNO2d-paddle使用数据集 darcy_train_16.npy并且设置`ntrains`=32 ，
+FNO2d-torch与FNO2d-paddle使用数据集 darcy_train_16.npy并且设置`ntrains=32 `。
 
 FNO2d-torch的优化器参数为：
 ```python
@@ -147,96 +232,486 @@ optimizer = paddle.optimizer.Adam(parameters=model.parameters(),
 FNO2d-torch与FNO2d-paddle的训练loss和学习率对比结果如下：
 
 
-| epoch   | loss_pytorch   | loss_paddle   |loss_diff|lr_pytorch|lr_paddle|lr_diff|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-| 0 | 32.06811523 | 32.06811523  |0.00|0.00797809|0.00797809|0.00|
-| 1 | 31.38529968 | 31.38491058  |3.89e-04|0.00791259|0.00791259|0.00|
-| 2 | 27.89798164 | 27.89617157 |1.81e-03|0.00780423|0.00780423|0.00|
-| 3| 30.61170769 | 30.61891174 |7.20e-03|0.00765418|0.00765418|0.00|
-| 4| 21.70384979 | 21.70200921 |1.84e-03|0.0074641|0.0074641|0.00|
-| 5| 21.37845802| 21.37961197|1.15e-03|0.00723607|0.00723607|0.00|
-| 6| 20.06527138| 20.06911851|3.85e-03|0.00697258|0.00697258|0.00|
-| 7| 16.89506531 | 16.89888763 |3.82e-03|0.00667652|0.00667652|0.00|
-| 8| 15.51529121 | 15.51611137 |8.20e-04|0.00635114|0.00635114|0.00|
-| 9| 14.76096916 | 14.75966835 |1.30e-03|0.00600000|0.00600000|0.00|
+<table >
+  <tr>
+    <th>epoch</th>
+    <th colspan="3"style="text-align: center;">loss </th>
+    <th colspan="3"style="text-align: center;">learning rate </th>
+  </tr>
+  <tr>
+    <th></th>
+    <th>loss_pytorch</th>
+    <th>loss_paddle</th>
+    <th>loss_diff</th>
+    <th>lr_pytorch</th>
+    <th>lr_paddle</th>
+    <th>lr_diff</th>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>32.06811523</td>
+    <td>32.06811523</td>
+    <td>0.00</td>
+    <td>0.00797809</td>
+    <td>0.00797809</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>31.38529968</td>
+    <td>31.38491058</td>
+    <td>3.89e-04</td>
+    <td>0.00791259</td>
+    <td>0.00791259</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>27.89798164</td>
+    <td>27.89617157</td>
+    <td>1.81e-03</td>
+    <td>0.00780423</td>
+    <td>0.00780423</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>30.61170769</td>
+    <td>30.61891174</td>
+    <td>7.20e-03</td>
+    <td>0.00765418</td>
+    <td>0.00765418</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>21.70384979</td>
+    <td>21.70200921</td>
+    <td>1.84e-03</td>
+    <td>0.0074641</td>
+    <td>0.0074641</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>21.37845802</td>
+    <td>21.37961197</td>
+    <td>1.15e-03</td>
+    <td>0.00723607</td>
+    <td>0.00723607</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td>20.06527138</td>
+    <td>20.06911851</td>
+    <td>3.85e-03</td>
+    <td>0.00697258</td>
+    <td>0.00697258</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>7</td>
+    <td>16.89506531</td>
+    <td>16.89888763</td>
+    <td>3.82e-03</td>
+    <td>0.00667652</td>
+    <td>0.00667652</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>15.51529121</td>
+    <td>15.51611137</td>
+    <td>8.20e-04</td>
+    <td>0.00635114</td>
+    <td>0.00635114</td>
+    <td>0.00</td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td>14.76096916</td>
+    <td>14.75966835</td>
+    <td>1.30e-03</td>
+    <td>0.00600000</td>
+    <td>0.00600000</td>
+    <td>0.00</td>
+  </tr>
+</table>
+
 
 ### 5.3 模型训练表现评估
 
-#### 5.3.1 10个模型在训练时使用的数据
+#### 5.3.1 不同模型在训练时使用的数据
 | 模型   | 数据集名称 |方程类型 |数据维度 |
 |:-----:|:-----:|:-----:|:-----:|
-| FNO1d |  burgers_lowres.mat |Burgers Equation |[32,3,16]|
+| FNO1d |  burgers_lowres.mat |Burgers Equation |[32,1,16]|
 | FNO2d | darcy_train_16.npy |Darcy Flow| [32,3,16,16]|
 | FNO3d | NavierStokes_V1e-5_N1200_T20.mat |Navier-Stokes Equation |[32,1,64,64,10]|
 | UFNO | darcy_train_16.npy |Darcy Flow| [32,3,16,16]|
 | SFNO |  darcy_train_16.npy |Darcy Flow| [32,3,16,16]|
+| TFNO1d | burgers_lowres.mat |Burgers Equation   |[32,1,16]  |
+| TFNO2d |darcy_train_16.npy | Darcy Flow  | [32,3,16,16]|
+| TFNO3d | NavierStokes_V1e-5_N1200_T20.mat |Navier-Stokes Equation   | [32,1,64,64,10] |
 
-#### 5.3.2 10个模型训练loss的差异
+#### 5.3.2 不同模型训练loss的差异
 | 模型   | Max(loss_diff)  | Min(loss_diff)   | MSE(loss_pytorch, loss_paddle)   | lr_diff   | 备注|
 |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 | FNO1d | 1.72e-02 | 3.05e-05  | 6.12e-05 |0.00 |单精度训练|
 | FNO2d | 7.20e-03 | 0.00 | 9.18e-06 |0.00 |单精度训练|
 | FNO3d | 7.50e-03 |1.14e-05   | 6.96e-06  |0.00 |单精度训练|
-| UFNO, layers=1 | 1.10e-06 | 1.53e-08  | 4.62e-13 |0.00 |双精度训练|
-| UFNO, layers=5 | 1.49e+01 |2.96e-02   | 2.84e+01  |0.00|双精度训练，具体见6.1|
-| SFNO | 6.85e-00 | 7.93e-02  | 1.55e+01 |0.00 |双精度训练|
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |&nbsp; ||
-| &nbsp; | &nbsp; | &nbsp;  | &nbsp; |&nbsp; ||
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |&nbsp; ||
-| &nbsp; | &nbsp; | &nbsp;  | &nbsp; |&nbsp; ||
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |&nbsp; ||
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |&nbsp; ||
-| &nbsp; | &nbsp; |&nbsp;   | &nbsp;  |&nbsp; ||
+| UFNO(layers=1) | 1.10e-06 | 1.53e-08  | 4.62e-13 |0.00 |双精度训练|
+| UFNO(layers=5) | 1.23e-04 |6.77e-09  | 2.71e-09  |0.00|双精度训练|
+| SFNO | 2.17e-06 | 1.65e-08  |1.05e-12 |0.00 |双精度训练|
+| TFNO1d | &nbsp; |&nbsp;   | &nbsp;  ||撰写中，具体见6.3节|
+| TFNO2d | &nbsp; | &nbsp;  | &nbsp; ||撰写中，具体见6.3节|
+|TFNO3d | &nbsp; |&nbsp;   | &nbsp;  ||撰写中，具体见6.3节|
 
-#### 5.3.3 10个模型训练耗时 
+
+#### 5.3.3 不同模型训练耗时 
 使用 `timeit` 模块中的 `default_timer` 进行计时，各个模型在训练 10个epochs 时的耗时为 `10_epochs_time`，数据读取耗时为 `data_reader_time`，其中包括所有的数据预处理步骤（例如对 y 进行UnitGaussianNormalizer）,各个模型的耗时（s）如下：
 
-| 模型   | 10_epochs_time_torch | data_reader_time_torch|10_epochs_time_paddle|data_reader_time_paddle| 
-|:-----:|:-----:|:-----:|:-----:|:-----:|
-| FNO1d | 1.47e-01 | 4.81e-03 |4.19e-01|1.77e-01|
-| FNO2d | 1.74e-01 | 7.17e-03 |4.56e-01|1.84e-01| 
-| FNO3d | 1.44 |1.57e-02   |1.42|2.54e-01| 
-| UFNO, layers=1 | 6.50e-02 | 6.87e-03  |1.91e-01|1.80e-01| 
-| UFNO, layers=5 | 1.89e-01 |6.87e-03  |3.88e-01|1.54e-01| 
-| SFNO | 1.71e-01| 6.98e-03  |3.24e-01|2.06e-01| 
-| &nbsp; | &nbsp; |&nbsp;   ||| 
-| &nbsp; | &nbsp; | &nbsp;  ||| 
-| &nbsp; | &nbsp; |&nbsp;   ||| 
-| &nbsp; | &nbsp; | &nbsp;  ||| 
-| &nbsp; | &nbsp; |&nbsp;   ||| 
+(fno2d,ufno,sfno)
+<table>
+  <tr>
+    <th>模型</th>
+    <th colspan="2" style="text-align: center;">10_epochs_time</th>
+    <th colspan="2" style="text-align: center;">data_reader_time</th>
+  </tr>
+  <tr>
+    <th></th>
+    <th>torch</th>
+    <th>paddle</th>
+    <th>torch</th>
+    <th>paddle</th>
+  </tr>
+  <tr>
+    <td>FNO1d</td>
+    <td>1.47e-01</td>
+    <td>4.19e-01</td>
+    <td>4.81e-03</td>
+    <td>1.77e-01</td>
+  </tr>
+  <tr>
+    <td>FNO2d</td>
+    <td>7.81e-01</td>
+    <td>3.13e-01</td>
+    <td>2.68e-02</td>
+    <td>1.14e-01</td>
+  </tr>
+  <tr>
+    <td>FNO3d</td>
+    <td>1.44</td>
+    <td>1.42</td>
+    <td>1.57e-02</td>
+    <td>2.54e-01</td>
+  </tr>
+  <tr>
+    <td>UFNO(layers=1)</td>
+    <td>6.30e-01</td>
+    <td>2.86e-01</td>
+    <td>2.68e-02</td>
+    <td>8.03e-02</td>
+  </tr>
+  <tr>
+    <td>UFNO(layers=5)</td>
+    <td>8.94e-01</td>
+    <td>5.26e-01</td>
+    <td>3.12e-02</td>
+    <td>9.05e-02</td>
+  </tr>
+  <tr>
+    <td>SFNO</td>
+    <td>8.11e-01</td>
+    <td>4.44e-01</td>
+    <td>3.19e-02</td>
+    <td>1.04e-01</td>
+  </tr>
+  <tr>
+    <td>TFNO1d</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>撰写中</td>
+  </tr>
+  <tr>
+    <td>TFNO2d</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>撰写中</td>
+  </tr>
+  <tr>
+    <td>TFNO3d</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>撰写中</td>
+  </tr>
+</table>
+
+
+
 
 ## 6. 待解决的问题
 
-## 6.1 UFNO，layers=5
+## 6.1 UFNO(layers=5)（已解决）
+在训练模型`UFNO(layers=5)`时，Pytorch版本和Paddle版本的训练损失在epoch=2时出现了显著差异，具体表现如下
 
-模型UFNO, layers=5的训练loss在epoch=2时，出现了巨大的误差，具体如下：
+<table>
+    <tr>
+    <th>epoch</th>
+    <th colspan="3"style="text-align: center;">loss </th>
+    <th colspan="3"style="text-align: center;">learning rate </th>
+    </tr>
+        <tr>
+            <th></th>
+            <th>loss_pytorch</th>
+            <th>loss_paddle</th>
+            <th>loss_diff</th>
+            <th>lr_pytorch</th>
+            <th>lr_paddle</th>
+            <th>lr_diff</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>0</td>
+            <td>31.99346241</td>
+            <td>32.02302024</td>
+            <td>2.96e-02</td>
+            <td>0.00797809</td>
+            <td>0.00797809</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>28.79406888</td>
+            <td>28.28792398</td>
+            <td>5.06e-01</td>
+            <td>0.00791259</td>
+            <td>0.00791259</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>47.18949491</td>
+            <td>62.09492780</td>
+            <td>1.49e+01</td>
+            <td>0.00780423</td>
+            <td>0.00780423</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>32.03622775</td>
+            <td>25.50253190</td>
+            <td>6.53e+00</td>
+            <td>0.00765418</td>
+            <td>0.00765418</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>27.85857869</td>
+            <td>28.94802254</td>
+            <td>1.09e+00</td>
+            <td>0.0074641</td>
+            <td>0.0074641</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>27.42604250</td>
+            <td>29.43171277</td>
+            <td>2.01e+00</td>
+            <td>0.00723607</td>
+            <td>0.00723607</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>30.13455886</td>
+            <td>28.78272349</td>
+            <td>1.35e+00</td>
+            <td>0.00697258</td>
+            <td>0.00697258</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>25.39807468</td>
+            <td>26.31120726</td>
+            <td>9.13e-01</td>
+            <td>0.00667652</td>
+            <td>0.00667652</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>24.83115153</td>
+            <td>22.55190781</td>
+            <td>2.28e+00</td>
+            <td>0.00635114</td>
+            <td>0.00635114</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td>22.83329250</td>
+            <td>20.45876442</td>
+            <td>2.37e+00</td>
+            <td>0.00600000</td>
+            <td>0.00600000</td>
+            <td>0.00</td>
+        </tr>
+    </tbody>
+</table>
 
-| epoch   | loss_pytorch   | loss_paddle   |loss_diff|lr_pytorch|lr_paddle|lr_diff|
-|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-| 0 | 31.99346241 | 32.02302024  |2.96e-02|0.00797809|0.00797809|0.00|
-| 1 | 28.79406888 | 28.28792398  |5.06e-01|0.00791259|0.00791259|0.00|
-| 2 | 47.18949491 | 62.09492780 |1.49e+01|0.00780423|0.00780423|0.00|
-| 3| 32.03622775 | 25.50253190 |6.53e+00|0.00765418|0.00765418|0.00|
-| 4| 27.85857869 | 28.94802254 |1.09e+00|0.0074641|0.0074641|0.00|
-| 5| 27.42604250| 29.43171277 |2.01e+00|0.00723607|0.00723607|0.00|
-| 6| 30.13455886| 28.78272349|1.35e+00|0.00697258|0.00697258|0.00|
-| 7| 25.39807468 | 26.31120726 |9.13e-01|0.00667652|0.00667652|0.00|
-| 8| 24.83115153 | 22.55190781 |2.28e+00|0.00635114|0.00635114|0.00|
-| 9| 22.83329250 | 20.45876442 |2.37e+00|0.00600000|0.00600000|0.00|
 
-由于模型 UFNO 在 layers=1 时的训练结果是对齐的，因此初步判断模型 UFNO 在 layers=5 时出现的问题是由误差累积引起的。目前该问题尚未解决。
 
-## 6.2 SFNO
+由于模型`UFNO(layers=1)`时的训练结果是对齐的，因此初步判断模型UFNO（layers=5）时出现的问题是由误差累积引起的。目前该问题尚未解决。
+
+## 6.2 SFNO（已解决）
+
+在训练模型`SFNO`时，Pytorch版本和Paddle版本的训练损失在epoch=3时出现了显著差异，具体表现如下
+
+<table>
+    <thead>
+        <tr>
+            <th>epoch</th>
+            <th colspan="3" style="text-align: center;">loss</th>
+            <th colspan="3" style="text-align: center;">learning rate</th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>loss_pytorch</th>
+            <th>loss_paddle</th>
+            <th>loss_diff</th>
+            <th>lr_pytorch</th>
+            <th>lr_paddle</th>
+            <th>lr_diff</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>0</td>
+            <td>32.06262686</td>
+            <td>32.14197592</td>
+            <td>7.93e-02</td>
+            <td>0.00797809</td>
+            <td>0.00797809</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>31.48523259</td>
+            <td>30.92742936</td>
+            <td>5.58e-01</td>
+            <td>0.00791259</td>
+            <td>0.00791259</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>27.51574327</td>
+            <td>24.31375748</td>
+            <td>3.20e+00</td>
+            <td>0.00780423</td>
+            <td>0.00780423</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>28.54495172</td>
+            <td>35.39358056</td>
+            <td>6.85e+00</td>
+            <td>0.00765418</td>
+            <td>0.00765418</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>22.02489485</td>
+            <td>17.31783389</td>
+            <td>4.71e+00</td>
+            <td>0.0074641</td>
+            <td>0.0074641</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>22.83375406</td>
+            <td>20.14916569</td>
+            <td>2.68e+00</td>
+            <td>0.00723607</td>
+            <td>0.00723607</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>22.05632114</td>
+            <td>19.80994133</td>
+            <td>2.25e+00</td>
+            <td>0.00697258</td>
+            <td>0.00697258</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>21.20442744</td>
+            <td>17.54419624</td>
+            <td>3.66e+00</td>
+            <td>0.00667652</td>
+            <td>0.00667652</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>19.56874356</td>
+            <td>14.98493694</td>
+            <td>4.58e+00</td>
+            <td>0.00635114</td>
+            <td>0.00635114</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td>18.70933591</td>
+            <td>13.35811956</td>
+            <td>5.35e+00</td>
+            <td>0.00600000</td>
+            <td>0.00600000</td>
+            <td>0.00</td>
+        </tr>
+    </tbody>
+</table>
 
 ## 6.3 TFNO
+
+`TFNO`中使用了tltorch进行张量分解，tltorch是tensorly的PyTorch版。tensorly源代码([https://github.com/tensorly/tensorly](https://github.com/tensorly/tensorly))中说明了
+```
+    You can change the backend to perform computation with a different framework. 
+    By default, the backend is NumPy, but you can also perform the computation using PyTorch, TensorFlow, JAX, CuPy or Paddle (requires to have installed them first). 
+```
+tensorly支持Paddle后端，但是在编写代码时发生了如下错误：
+
+```python
+import tensorly as tl
+tl.set_backend('paddle')
+
+ValueError:Unknown backend name 'paddle', known backends are ['numpy', 'mxnet', 'pytorch', 'tensorflow', 'cupy', 'jax']
+```
+
 
 ## 7. 可行性分析和排期规划
 
 
 | 里程碑        |  时间点     |
-| -------------| ------------ | 
-| 提交RFC      |     2024.10.25        |    
-| 提交PR，修改代码完成合入          |    2024.11.25       | 
+| :-------------:| :------------: | 
+| 提交RFC      |     2024.10.25        |  
+| 完成全部代码撰写并通过相关单测验证  |    2024.10.25-2024.11.15        |
+| 提交PR，修改代码完成合入 |  2024.11.15-2024.11.25       | 
 ## 8. 影响面
 
 
